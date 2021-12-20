@@ -1,0 +1,122 @@
+#' @title Find the shortest path between two vertex using R.
+#' @name floyd
+#' @description Find the shortest path between two vertex using R.
+#' @param A primitive distance matrix 
+#' @return the shortest distance between i to j
+#' @examples
+#' \dontrun{
+#' a=matrix(0,7,7)
+#' a[1,2]=3;a[1,3]=5;
+#' a[2,3]=1;a[2,4]=5;a[2,5]=8;
+#' a[3,4]=7;a[3,5]=4;a[3,6]=10;
+#' a[4,5]=3;a[4,7]=6;
+#' a[5,6]=1;a[5,7]=2;
+#' a[6,7]=2
+#' b=a+t(a)
+#' b[b==0]=Inf
+#' floyd(b)
+#' }
+#' @export
+floyd<-function(A){
+  n<-nrow(A)
+  D<-A
+  path<-matrix(0,n,n)
+  for(i in 1:n){
+    for(j in 1:n){
+      if(is.finite(D[i,j])==T){path[i,j]=j}
+    }
+  }
+  for(k in 1:n){
+    for(i in 1:n){
+      for(j in 1:n){
+        if(D[i,k]+D[k,j]<D[i,j]){
+          D[i,j]=D[i,k]+D[k,j];
+          path[i,j]=path[i,k]
+        }
+      }
+    }
+  }
+  return(list(path=path,D=D))
+}
+
+
+#' @title Using Gauss function as kernel density estimation using R
+#' @name kerden
+#' @description Using Gauss function as kernel density estimation for random sample of \code{dep} using R
+#' @param x samples
+#' @param h bandwidth
+#' @return kernel density estimation
+#' @examples
+#' \dontrun{
+#' p=0.3 
+#' mu=c(0,1) 
+#' sigma=c(1,0.3)
+#' data=c(dep(mu,sigma,p))
+#' plot(density(data),ylim=c(-0.1,5),main="",xlab="",col=1,lwd=2)
+#' lines(kerden(data,0.005),col=2,lwd=1)
+#' }
+#' @import stats
+#' @useDynLib StatComp21082
+#' @export
+kerden=function(x,h){
+  x=sort(x)
+  n=length(x);s=0;t=0;y=0
+  for(i in 2:n)
+    s[i]=0
+  for(i in 1:n){
+    for(j in 1:n)
+      s[i]=s[i]+exp(-((x[i]-x[j])^2)/(2*h*h))
+    t[i]=s[i]
+  }
+  for(i in 1:n)
+    y[i]=t[i]/(n*h*sqrt(2*pi))
+  z=complex(real=x,imaginary=y)
+  return(z)
+}
+
+
+#' @title  Generate random sample from a two-component normal mixture using R
+#' @name dep
+#' @description Generate random sample from a two-component normal mixture using R
+#' @param mu sample mean 
+#' @param sigma sample standard deviation
+#' @param p ratio of two distributions
+#' @return random sample from a two-component normal mixture
+#' @import MASS 
+#' @import boot 
+#' @import bootstrap 
+#' @import RANN 
+#' @import energy 
+#' @import Ball
+#' @examples
+#' \dontrun{
+#' p=0.3 
+#' mu=c(0,1) 
+#' sigma =c(1,0.3)
+#' dep(mu,sigma,p)
+#' }
+#' @export
+dep=function(mu,sigma,p){
+  n=30 
+  i=sample(1:2,size=n,replace=TRUE,prob=c(p,1-p))
+  x=rnorm(n, mu[i], sigma[i])
+  m=5000
+  xt=numeric(m)
+  u=runif(m)
+  a=1 
+  b=1
+  y<-rbeta(m,a,b) 
+  xt[1]=0.5
+  for (i in 2:m) {
+    fy<-y[i]*dnorm(x,mu[1],sigma[1]) +
+      (1-y[i])*dnorm(x,mu[2],sigma[2])
+    fx<-xt[i-1]*dnorm(x,mu[1],sigma[1])+
+      (1-xt[i-1])*dnorm(x,mu[2],sigma[2])
+    r<-prod(fy/fx)*
+      (xt[i-1]^(a-1)*(1-xt[i-1])^(b-1))/
+      (y[i]^(a-1)*(1-y[i])^(b-1))
+    if(u[i]<=r) xt[i]<-y[i] 
+    else xt[i]<-xt[i-1]
+  }
+  return(xt)
+}

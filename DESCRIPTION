@@ -1,0 +1,18 @@
+Package: StatComp21082
+Type: Package
+Title: StatComp21082
+Version: 1.0
+Date: 2021-12-18
+Author: Lin YuYing
+Maintainer: Lin YuYing <linyuying@mail.ustc.edu.cn>
+Description: Find the shortest path between two vertex using R;
+  Using Gauss function as kernel density estimation using R.
+License: GPL (>= 2)
+Imports: Rcpp,microbenchmark,knitr,rmarkdown
+LinkingTo: Rcpp
+RoxygenNote: 7.1.2
+Encoding: UTF-8
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+URL: http://github.com/linyying/StatComp21082
+BugReports: http://github.com/linyying/StatComp21082/issues
